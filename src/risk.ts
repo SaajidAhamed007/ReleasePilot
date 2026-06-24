@@ -56,11 +56,44 @@ async function main() {
   const dir = currentReleaseDir();
   fs.writeFileSync(`${dir}/RISKS.md`, report + "\n");
 
+  // Embed the risk section into the latest-commit document so the
+  // findings show up in the main per-release markdown. Demote the H1
+  // to H2 so it nests under the existing document headings.
+  const latestCommitPath = `${dir}/LATEST_COMMIT.md`;
+  const embedded =
+    "\n\n---\n\n" + report.replace(/^# /, "## ") + "\n";
+
+  if (fs.existsSync(latestCommitPath)) {
+    fs.appendFileSync(latestCommitPath, embedded);
+  } else {
+    fs.writeFileSync(latestCommitPath, report + "\n");
+  }
+
   console.log(report);
-  console.log(`\nRisk report written to ${dir}/RISKS.md`);
+  console.log(
+    `\nRisk report written to ${dir}/RISKS.md and embedded into ${latestCommitPath}`
+  );
+
+  // Concise one-line summary for the workflow log.
+  if (issues.length === 0) {
+    console.log("\nPossible risks are: none detected ✅");
+  } else {
+    const summary = issues
+      .map(i => {
+        const file = i.component.split(":").pop() ?? "";
+        const where = i.line ? `${file}:${i.line}` : file;
+        return `${i.message} (${where})`;
+      })
+      .join("; ");
+    console.log(`\nPossible risks are: ${summary}`);
+  }
 }
 
+// Risk analysis is advisory: never fail the workflow over it.
 main().catch(err => {
-  console.error("Risk generation failed:", err.message);
-  process.exit(1);
+  console.log(
+    "Possible risks are: could not be determined " +
+      `(risk analysis unavailable: ${err.message})`
+  );
+  process.exit(0);
 });

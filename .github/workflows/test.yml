@@ -15,6 +15,15 @@ jobs:
     permissions:
       contents: write
 
+    # Ephemeral SonarQube server for the risk-analysis step.
+    services:
+      sonarqube:
+        image: sonarqube:community
+        ports:
+          - 9000:9000
+        env:
+          SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -43,3 +52,51 @@ jobs:
         run: node dist/index.js
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      # ---- Risk analysis (SonarQube). Never fails the run. ----
+
+      - name: Wait for SonarQube
+        run: |
+          for i in $(seq 1 40); do
+            status=$(curl -s http://localhost:9000/api/system/status | jq -r .status || true)
+            echo "SonarQube status: $status"
+            [ "$status" = "UP" ] && break
+            sleep 5
+          done
+
+      - name: Bootstrap SonarQube token
+        id: sonar
+        run: |
+          # Fresh server: default creds are admin/admin. Rotate the
+          # password (SonarQube requires >= 12 chars) then mint a token.
+          curl -s -u admin:admin -X POST \
+            "http://localhost:9000/api/users/change_password?login=admin&previousPassword=admin&password=SonarAdmin12345!" \
+            || true
+          TOKEN=$(curl -s -u admin:SonarAdmin12345! -X POST \
+            "http://localhost:9000/api/user_tokens/generate?name=ci-$RANDOM" | jq -r .token || true)
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: SonarQube Scan
+        continue-on-error: true
+        uses: SonarSource/sonarqube-scan-action@v3
+        env:
+          SONAR_TOKEN: ${{ steps.sonar.outputs.token }}
+          SONAR_HOST_URL: http://localhost:9000
+
+      - name: Generate Risk Report
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ steps.sonar.outputs.token }}
+          SONAR_HOST_URL: http://localhost:9000
+          SONAR_PROJECT_KEY: releasepilot
+        run: node dist/risk.js
+
+      - name: Commit Risk Updates
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release-notes/
+          git commit -m "docs: add risk analysis to latest commit" || echo "No risk changes to commit"
+          git push || echo "Nothing to push"
