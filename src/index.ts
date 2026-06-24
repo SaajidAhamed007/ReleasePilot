@@ -1,5 +1,5 @@
 import { getGithubContext } from "./github/githubContext.js";
-import { getCommits } from "./github/getCommits.js";
+import { getCommits } from "./github/getCommit.js";
 
 console.log("=== GITHUB CONTEXT ===");
 console.log(getGithubContext());
