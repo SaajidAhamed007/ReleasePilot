@@ -47,7 +47,10 @@ export function generateRiskReport(
     `**Risks introduced by last commit:** ${issues.length}`
   );
   lines.push("");
-  
+
+//eirojewirioew
+//uebfriuoewu
+
 
   if (sorted.length === 0) {
     lines.push(
