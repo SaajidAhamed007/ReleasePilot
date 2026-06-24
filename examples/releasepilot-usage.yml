@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Example workflow: use ReleasePilot in YOUR repository
 #
-# Copy this file into YOUR repo at: .github/workflows/release-notes.yml
-# Replace <owner> with the GitHub username/org that owns ReleasePilot.
+# This file is generated automatically when you connect a repository at
+# release-pilot-murex.vercel.app — you normally don't need to write it by
+# hand. Kept here as a reference for what gets installed and why.
 #
-# Required secret: GEMINI_API_KEY
-#   Your repo → Settings → Secrets and variables → Actions → New repository secret
-#   Name:  GEMINI_API_KEY
-#   Value: (your key from aistudio.google.com)
+# Required secret: RELEASEIQ_TOKEN
+#   Issued automatically when you connect your repo. If you need to rotate
+#   it, disconnect and reconnect from the ReleaseIQ dashboard.
 # ─────────────────────────────────────────────────────────────────────────────
 
 name: Generate Release Notes
@@ -25,7 +25,7 @@ jobs:
       contents: write         # needed so ReleasePilot can commit the files back
 
     steps:
-      # Step 1 — Check out YOUR repository (with full history for Gemini analysis)
+      # Step 1 — Check out YOUR repository (with full history for analysis)
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -33,11 +33,12 @@ jobs:
 
       # Step 2 — Run ReleasePilot
       - name: Generate Release Notes
-        uses: <owner>/ReleasePilot@v1
+        uses: SaajidAhamed007/ReleasePilot@v1
         with:
-          gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
+          releaseiq-token: ${{ secrets.RELEASEIQ_TOKEN }}
           # All options below are optional — shown with their default values
 
+          # releaseiq-api-url: 'https://release-pilot-murex.vercel.app'
           # github-token: ${{ github.token }}     # token used to commit the files
           # commit-notes: 'true'                  # set to 'false' to skip the commit
           # commit-message: 'docs: update AI-generated release notes [skip ci]'
@@ -52,9 +53,9 @@ jobs:
 #
 #      - name: Generate Release Notes
 #        id: rp
-#        uses: <owner>/ReleasePilot@v1
+#        uses: SaajidAhamed007/ReleasePilot@v1
 #        with:
-#          gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
+#          releaseiq-token: ${{ secrets.RELEASEIQ_TOKEN }}
 #          commit-notes: 'false'   # don't auto-commit; we'll open a PR instead
 #
 #      - name: Print generated file paths

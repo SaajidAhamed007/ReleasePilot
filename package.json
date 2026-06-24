@@ -15,7 +15,6 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
-    "@google/generative-ai": "^0.24.1",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {

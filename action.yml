@@ -1,16 +1,26 @@
 name: ReleasePilot
 description: >
-  AI-powered release notes generator. Analyzes your Git commit history with
-  Gemini AI and writes two documents: a full project evolution summary and a
-  detailed breakdown of the latest commit. Works with any tech stack.
+  AI-powered release notes generator. Analyzes your Git commit history and
+  diffs through the ReleaseIQ backend and writes two documents: a full
+  project evolution summary and a detailed breakdown of the latest commit.
+  Works with any tech stack.
 author: Saajid Ahamed
 
 inputs:
-  gemini-api-key:
+  releaseiq-token:
     description: >
-      Your Google Gemini API key. Store this as a repository secret and pass it
-      in via the secrets context in your workflow. Never hardcode it directly.
+      Your ReleaseIQ ingestion token, issued when you connect a repository at
+      release-pilot-murex.vercel.app. Store this as a repository secret named
+      RELEASEIQ_TOKEN and pass it in via the secrets context in your workflow.
+      Never hardcode it directly.
     required: true
+
+  releaseiq-api-url:
+    description: >
+      Base URL of the ReleaseIQ backend. Only override this for local
+      development or testing against a non-production deployment.
+    required: false
+    default: 'https://release-pilot-murex.vercel.app'
 
   github-token:
     description: >

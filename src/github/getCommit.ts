@@ -49,3 +49,75 @@ export function getLatestCommitStat(): string {
     return "File change statistics unavailable.";
   }
 }
+
+export interface FileDiff {
+  file: string;
+  status: "added" | "modified" | "removed" | "renamed";
+  patch: string;
+  additions: number;
+  deletions: number;
+}
+
+const MAX_PATCH_CHARS = 3000;
+
+// Returns per-file diffs (status, patch, line counts) for the most recent
+// commit. Used to give the AI real diff content instead of just file names.
+export function getLatestCommitDiffs(): FileDiff[] {
+  try {
+    const nameStatusOutput = execSync(
+      "git diff-tree --no-commit-id -r --name-status HEAD"
+    ).toString();
+    const numstatOutput = execSync(
+      "git diff-tree --no-commit-id -r --numstat HEAD"
+    ).toString();
+    const patchOutput = execSync(
+      "git diff-tree --no-commit-id -r -p HEAD"
+    ).toString();
+
+    const statusMap = new Map<string, FileDiff["status"]>();
+    for (const line of nameStatusOutput.split("\n").filter(Boolean)) {
+      const parts = line.split("\t");
+      const code = parts[0];
+      const filePath = parts[parts.length - 1];
+      let status: FileDiff["status"] = "modified";
+      if (code.startsWith("A")) status = "added";
+      else if (code.startsWith("D")) status = "removed";
+      else if (code.startsWith("R")) status = "renamed";
+      statusMap.set(filePath, status);
+    }
+
+    const statsMap = new Map<string, { additions: number; deletions: number }>();
+    for (const line of numstatOutput.split("\n").filter(Boolean)) {
+      const [add, del, filePath] = line.split("\t");
+      statsMap.set(filePath, {
+        additions: add === "-" ? 0 : parseInt(add, 10),
+        deletions: del === "-" ? 0 : parseInt(del, 10),
+      });
+    }
+
+    const patchMap = new Map<string, string>();
+    for (const chunk of patchOutput.split(/^diff --git /m).filter(Boolean)) {
+      const firstLine = chunk.split("\n")[0];
+      const match = firstLine.match(/a\/(.+?) b\/(.+)$/);
+      const filePath = match ? match[2] : firstLine.trim();
+      const fullPatch = "diff --git " + chunk;
+      patchMap.set(
+        filePath,
+        fullPatch.length > MAX_PATCH_CHARS
+          ? fullPatch.slice(0, MAX_PATCH_CHARS) + "\n... (truncated)"
+          : fullPatch
+      );
+    }
+
+    const files = new Set([...statusMap.keys(), ...statsMap.keys()]);
+    return Array.from(files).map((file) => ({
+      file,
+      status: statusMap.get(file) ?? "modified",
+      patch: patchMap.get(file) ?? "",
+      additions: statsMap.get(file)?.additions ?? 0,
+      deletions: statsMap.get(file)?.deletions ?? 0,
+    }));
+  } catch {
+    return [];
+  }
+}

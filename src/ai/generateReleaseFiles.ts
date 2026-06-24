@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import * as core from "@actions/core";
-import { getAllCommits, getLatestCommitStat } from "../github/getCommit.js";
+import { getAllCommits, getLatestCommitDiffs } from "../github/getCommit.js";
 import { analyzeCommits } from "./analyzer.js";
 
 interface GenerateOptions {
@@ -28,13 +28,13 @@ export async function generateReleaseFiles({
   const allCommits = getAllCommits(maxCommits);
   core.info(`📋 Fetched ${allCommits.length} commit(s) from repository.`);
 
-  // Step 2: Get file-change statistics for the latest commit
-  const latestFileStat = getLatestCommitStat();
+  // Step 2: Get per-file diffs for the latest commit
+  const latestDiffs = getLatestCommitDiffs();
 
-  // Step 3: Generate content via Gemini (or fall back to raw commit list)
+  // Step 3: Generate content via the ReleaseIQ backend (or fall back to raw commit list)
   const { evolution, latestCommit } = await analyzeCommits(
     allCommits,
-    latestFileStat
+    latestDiffs
   );
 
   // Step 4: Create output directories if they do not exist.
