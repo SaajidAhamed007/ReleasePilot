@@ -1,25 +1,26 @@
 {
   "name": "releasepilot",
   "version": "1.0.0",
-  "description": "",
+  "description": "AI-powered release notes generator using Gemini AI — works with any repository tech stack",
   "license": "ISC",
-  "author": "",
+  "author": "Saajid Ahamed",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build src/index.ts -o dist --license licenses.txt",
+    "typecheck": "tsc --noEmit",
     "dev": "tsx src/index.ts",
-    "build": "tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@actions/core": "^3.0.1",
-    "@actions/github": "^9.1.1",
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1",
     "@google/generative-ai": "^0.24.1",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
     "@types/node": "^26.0.0",
+    "@vercel/ncc": "^0.38.3",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }

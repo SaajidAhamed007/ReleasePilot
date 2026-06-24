@@ -1,13 +1,64 @@
 name: ReleasePilot
-
-description: AI-powered changelog and release notes generator using Gemini
-
+description: >
+  AI-powered release notes generator. Analyzes your Git commit history with
+  Gemini AI and writes two documents: a full project evolution summary and a
+  detailed breakdown of the latest commit. Works with any tech stack.
 author: Saajid Ahamed
 
 inputs:
-  gemini_api_key:
-    description: Google Gemini API Key
+  gemini-api-key:
+    description: >
+      Your Google Gemini API key. Store this as a repository secret and pass it
+      as ${{ secrets.GEMINI_API_KEY }}. Never hardcode it in your workflow.
     required: true
+
+  github-token:
+    description: >
+      GitHub token used to commit the generated release notes back to your
+      repository. The default ${{ github.token }} works for most cases. If you
+      push to a different repository you will need a PAT with contents:write.
+    required: false
+    default: ${{ github.token }}
+
+  commit-notes:
+    description: >
+      Set to 'true' (default) to automatically commit and push the generated
+      files. Set to 'false' to only write the files locally so you can inspect
+      or open a pull request yourself.
+    required: false
+    default: 'true'
+
+  commit-message:
+    description: Commit message used when pushing the generated release notes.
+    required: false
+    default: 'docs: update AI-generated release notes [skip ci]'
+
+  evolution-file:
+    description: >
+      File path (relative to the repository root) where the project evolution
+      document is written. This file covers the full commit history.
+    required: false
+    default: 'release-notes/PROJECT_EVOLUTION.md'
+
+  latest-commit-file:
+    description: >
+      File path (relative to the repository root) where the latest commit
+      analysis is written. This file covers only the most recent commit.
+    required: false
+    default: 'release-notes/LATEST_COMMIT.md'
+
+  max-commits:
+    description: >
+      How many recent commits to include when building the project evolution
+      document. Higher values give Gemini more context but use more tokens.
+    required: false
+    default: '100'
+
+outputs:
+  evolution-file:
+    description: Path to the written project evolution document.
+  latest-commit-file:
+    description: Path to the written latest commit analysis document.
 
 runs:
   using: node20

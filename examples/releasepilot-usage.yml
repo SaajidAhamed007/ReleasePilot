@@ -1,0 +1,71 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Example workflow: use ReleasePilot in YOUR repository
+#
+# Copy this file into YOUR repo at: .github/workflows/release-notes.yml
+# Replace <owner> with the GitHub username/org that owns ReleasePilot.
+#
+# Required secret: GEMINI_API_KEY
+#   Your repo → Settings → Secrets and variables → Actions → New repository secret
+#   Name:  GEMINI_API_KEY
+#   Value: (your key from aistudio.google.com)
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Generate Release Notes
+
+on:
+  push:
+    branches: [main]          # runs on every push to main
+  workflow_dispatch:          # also allows manual trigger from the Actions tab
+
+jobs:
+  release-notes:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write         # needed so ReleasePilot can commit the files back
+
+    steps:
+      # Step 1 — Check out YOUR repository (with full history for Gemini analysis)
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0      # 0 = full history; do not set to 1
+
+      # Step 2 — Run ReleasePilot
+      - name: Generate Release Notes
+        uses: <owner>/ReleasePilot@v1
+        with:
+          gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
+          # All options below are optional — shown with their default values
+
+          # github-token: ${{ github.token }}     # token used to commit the files
+          # commit-notes: 'true'                  # set to 'false' to skip the commit
+          # commit-message: 'docs: update AI-generated release notes [skip ci]'
+          # evolution-file: 'release-notes/PROJECT_EVOLUTION.md'
+          # latest-commit-file: 'release-notes/LATEST_COMMIT.md'
+          # max-commits: '100'
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ADVANCED: Use the output paths in a later step
+# ─────────────────────────────────────────────────────────────────────────────
+#
+#      - name: Generate Release Notes
+#        id: rp
+#        uses: <owner>/ReleasePilot@v1
+#        with:
+#          gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
+#          commit-notes: 'false'   # don't auto-commit; we'll open a PR instead
+#
+#      - name: Print generated file paths
+#        run: |
+#          echo "Evolution: ${{ steps.rp.outputs.evolution-file }}"
+#          echo "Latest:    ${{ steps.rp.outputs.latest-commit-file }}"
+#
+#      - name: Open a pull request with the release notes
+#        uses: peter-evans/create-pull-request@v6
+#        with:
+#          title: "docs: AI-generated release notes"
+#          branch: release-notes-update
+#          commit-message: "docs: update AI-generated release notes"
+# ─────────────────────────────────────────────────────────────────────────────

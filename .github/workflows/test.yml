@@ -1,13 +1,14 @@
-name: ReleasePilot Test
+name: CI — Build and Validate
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  releasepilot:
-    # Skip runs triggered by the bot's own commit to avoid infinite loops
+  build:
+    # Never run on commits made by the bot (prevents loops)
     if: github.actor != 'github-actions[bot]'
 
     runs-on: ubuntu-latest
@@ -16,30 +17,32 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout ReleasePilot
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build Project
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Bundle action (ncc)
         run: npm run build
 
-      - name: Verify dist/ is up to date
-        run: |
-          if ! git diff --exit-code -- dist/; then
-            echo "::error::dist/ is out of date with src/. Run 'npm run build' and commit the result."
-            exit 1
-          fi
+      - name: Verify dist/index.js was produced
+        run: test -f dist/index.js && echo "✅ dist/index.js exists"
 
-      - name: Run ReleasePilot
-        run: node dist/index.js
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Commit updated dist/ back to main
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/
+          git diff --staged --quiet \
+            && echo "ℹ️  dist/ unchanged — nothing to commit." \
+            || (git commit -m "build: update bundled dist/ [skip ci]" && git push)
