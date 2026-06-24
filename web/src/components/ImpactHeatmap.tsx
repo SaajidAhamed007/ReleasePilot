@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ResponsiveContainer, Treemap, Tooltip } from "recharts";
-import { impactModules } from "@/data/mock-release";
+import type { ModuleImpact } from "@/types/release";
 import { SectionHeading } from "./SectionHeading";
 
 const riskColor: Record<string, string> = {
@@ -10,12 +10,6 @@ const riskColor: Record<string, string> = {
   medium: "#fbbf24",
   low: "#34d399",
 };
-
-const treemapData = impactModules.map((m) => ({
-  name: m.name,
-  size: m.filesChanged,
-  riskLevel: m.riskLevel,
-}));
 
 interface TreemapCellProps {
   x?: number;
@@ -79,7 +73,17 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<
   );
 }
 
-export function ImpactHeatmap() {
+interface ImpactHeatmapProps {
+  impactModules: ModuleImpact[];
+}
+
+export function ImpactHeatmap({ impactModules }: ImpactHeatmapProps) {
+  const treemapData = impactModules.map((m) => ({
+    name: m.name,
+    size: m.filesChanged,
+    riskLevel: m.riskLevel,
+  }));
+
   return (
     <section className="relative mx-auto w-full max-w-6xl px-6 py-24 sm:px-10">
       <SectionHeading

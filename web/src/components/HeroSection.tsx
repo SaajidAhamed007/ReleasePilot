@@ -10,20 +10,21 @@ import {
   GitBranch,
   Clock,
   ArrowRight,
+  Rocket,
+  BookOpen,
+  GitCommitHorizontal,
 } from "lucide-react";
-import { repository, releaseSummary } from "@/data/mock-release";
+import type { RepositoryInfo, ReleaseSummaryInfo } from "@/types/release";
 
 const iconMap = {
   ShieldCheck,
   Zap,
   Bug,
   RefreshCcw,
+  Rocket,
+  BookOpen,
+  GitCommitHorizontal,
 };
-
-const formattedDate = new Date(repository.generatedAt).toLocaleString("en-US", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
 
 const container = {
   hidden: {},
@@ -37,7 +38,17 @@ const item = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
 
-export function HeroSection() {
+interface HeroSectionProps {
+  repository: RepositoryInfo;
+  releaseSummary: ReleaseSummaryInfo;
+}
+
+export function HeroSection({ repository, releaseSummary }: HeroSectionProps) {
+  const formattedDate = new Date(repository.generatedAt).toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
   return (
     <section className="relative isolate flex min-h-[100vh] w-full items-center overflow-hidden px-6 pt-28 pb-20 sm:px-10">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -109,7 +120,7 @@ export function HeroSection() {
           </div>
           <ul className="flex flex-col gap-3">
             {releaseSummary.highlights.map((h, i) => {
-              const Icon = iconMap[h.icon as keyof typeof iconMap];
+              const Icon = iconMap[h.icon as keyof typeof iconMap] ?? Sparkles;
               return (
                 <motion.li
                   key={h.text}

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Sparkle } from "lucide-react";
-import { qualityScore } from "@/data/mock-release";
+import type { QualityScoreData } from "@/types/release";
 import { SectionHeading } from "./SectionHeading";
 import { useCountUp } from "@/hooks/use-count-up";
 
@@ -76,7 +76,11 @@ function BreakdownRow({ label, score, color, delay }: { label: string; score: nu
   );
 }
 
-export function QualityScore() {
+interface QualityScoreProps {
+  qualityScore: QualityScoreData;
+}
+
+export function QualityScore({ qualityScore }: QualityScoreProps) {
   return (
     <section className="relative mx-auto w-full max-w-5xl px-6 py-24 sm:px-10">
       <SectionHeading

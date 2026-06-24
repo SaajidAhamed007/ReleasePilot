@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Rocket, Bug, RefreshCcw, BookOpen, ChevronDown, GitCommitHorizontal } from "lucide-react";
-import { categories, type CategorySummary } from "@/data/mock-release";
+import type { CategorySummary } from "@/types/release";
 import { SectionHeading } from "./SectionHeading";
 import { useCountUp } from "@/hooks/use-count-up";
 import { cn } from "@/lib/utils";
@@ -94,7 +94,11 @@ function CategoryCard({ category, index }: { category: CategorySummary; index: n
   );
 }
 
-export function CategoryCards() {
+interface CategoryCardsProps {
+  categories: CategorySummary[];
+}
+
+export function CategoryCards({ categories }: CategoryCardsProps) {
   return (
     <section id="categories" className="relative mx-auto w-full max-w-6xl px-6 py-24 sm:px-10">
       <SectionHeading

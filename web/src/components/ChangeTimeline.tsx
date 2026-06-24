@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, FileCode2, Sparkles, Rocket, Bug, RefreshCcw, BookOpen } from "lucide-react";
-import { timeline, type CommitCategory } from "@/data/mock-release";
+import type { CommitCategory, CommitEntry } from "@/types/release";
 import { SectionHeading } from "./SectionHeading";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,11 @@ const categoryStyles: Record<CommitCategory, { icon: typeof Rocket; color: strin
   docs: { icon: BookOpen, color: "text-emerald-300 bg-emerald-500/15", label: "Docs" },
 };
 
-export function ChangeTimeline() {
+interface ChangeTimelineProps {
+  timeline: CommitEntry[];
+}
+
+export function ChangeTimeline({ timeline }: ChangeTimelineProps) {
   const [openId, setOpenId] = useState<string | null>(timeline[0]?.id ?? null);
 
   return (

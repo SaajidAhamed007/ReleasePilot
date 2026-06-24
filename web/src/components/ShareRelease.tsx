@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link2, FileText, FileDown, Check } from "lucide-react";
-import { repository, shareRelease } from "@/data/mock-release";
+import type { RepositoryInfo, ShareReleaseInfo } from "@/types/release";
 import { SectionHeading } from "./SectionHeading";
 
 function XLogo({ className }: { className?: string }) {
@@ -34,7 +34,12 @@ function downloadFile(filename: string, content: string, type: string) {
   URL.revokeObjectURL(url);
 }
 
-export function ShareRelease() {
+interface ShareReleaseProps {
+  repository: RepositoryInfo;
+  shareRelease: ShareReleaseInfo;
+}
+
+export function ShareRelease({ repository, shareRelease }: ShareReleaseProps) {
   const [copied, setCopied] = useState(false);
 
   const shareUrl = `${repository.url}/releases/tag/${repository.latestVersion}`;

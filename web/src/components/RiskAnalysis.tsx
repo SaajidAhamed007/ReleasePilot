@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { AlertTriangle, ShieldAlert, Gauge, Boxes } from "lucide-react";
-import { riskAnalysis } from "@/data/mock-release";
+import type { RiskAnalysisData } from "@/types/release";
 import { SectionHeading } from "./SectionHeading";
 import { Badge } from "@/components/ui/badge";
 import { useCountUp } from "@/hooks/use-count-up";
@@ -26,8 +26,19 @@ const levelStyles = {
   },
 };
 
-export function RiskAnalysis() {
-  const style = levelStyles[riskAnalysis.level];
+interface RiskAnalysisProps {
+  riskAnalysis: RiskAnalysisData;
+}
+
+export function RiskAnalysis({ riskAnalysis }: RiskAnalysisProps) {
+  // AI output casing can drift - normalize defensively so an unexpected value
+  // never crashes the render with levelStyles[undefined].
+  const normalizedLevel = (["HIGH", "MEDIUM", "LOW"] as const).includes(
+    riskAnalysis.level
+  )
+    ? riskAnalysis.level
+    : "MEDIUM";
+  const style = levelStyles[normalizedLevel];
   const { ref, value } = useCountUp(riskAnalysis.confidence, 1.4);
 
   return (
@@ -61,7 +72,7 @@ export function RiskAnalysis() {
             <div className="flex flex-wrap items-center gap-3">
               <Badge className={cn("border px-3 py-1 text-sm font-semibold", style.badge)}>
                 <ShieldAlert className="size-3.5" />
-                {riskAnalysis.level} RISK
+                {normalizedLevel} RISK
               </Badge>
               <span className="text-white/40">·</span>
               <h3 className="text-lg font-semibold text-white">

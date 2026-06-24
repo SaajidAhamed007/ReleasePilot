@@ -147,17 +147,17 @@ export async function analyzeRelease(payload: IngestionPayload): Promise<Analyze
 
   return {
     result: structured,
-    markdownSummary: renderMarkdownSummary(payload, structured),
+    markdownSummary: renderMarkdownSummary(payload.repoFullName, structured),
     usedFallback,
   };
 }
 
 export function renderMarkdownSummary(
-  payload: IngestionPayload,
+  repoFullName: string,
   structured: StructuredRelease
 ): string {
   const lines: string[] = [];
-  lines.push(`# ${payload.repoFullName}`);
+  lines.push(`# ${repoFullName}`);
   lines.push("");
   lines.push(`## ${structured.narrative.headline}`);
   lines.push("");
