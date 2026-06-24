@@ -1,13 +1,25 @@
-import { commitChanges } from "./git/commitChanges.js";
-import { getCommits } from "./github/getCommit.js";
+// Load .env file for local development.
+// In GitHub Actions, secrets are injected as real environment variables
+// so dotenv is a no-op there — it never overwrites existing env vars.
+import "dotenv/config";
+
 import { getGithubContext } from "./github/githubContext.js";
-import { generateMockFiles } from "./mock/generateMockFiles.js";
+import { generateReleaseFiles } from "./ai/generateReleaseFiles.js";
+import { commitChanges } from "./git/commitChanges.js";
 
-console.log(getGithubContext());
-console.log(getCommits());
+async function main(): Promise<void> {
+  // Log current GitHub context (repo, sha, ref)
+  console.log("🚀 ReleasePilot starting...");
+  console.log(getGithubContext());
 
-generateMockFiles();
+  // Generate AI-powered CHANGELOG.md and RELEASE_NOTES.md
+  await generateReleaseFiles();
 
-commitChanges();
+  // Commit and push the generated files back to the repository
+  commitChanges();
+}
 
-console.log("Mock files generated");
+main().catch((error: unknown) => {
+  console.error("❌ ReleasePilot failed:", error);
+  process.exit(1);
+});
