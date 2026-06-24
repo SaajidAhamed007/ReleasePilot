@@ -1,27 +1,25 @@
 import fs from "fs";
 import { getAllCommits, getLatestCommitStat } from "../github/getCommit.js";
-import { getNextReleaseVersion } from "../utils/version.js";
 import { analyzeCommits } from "./analyzer.js";
 
+const RELEASE_DIR = "release-notes";
+const EVOLUTION_FILE = `${RELEASE_DIR}/PROJECT_EVOLUTION.md`;
+const LATEST_FILE = `${RELEASE_DIR}/LATEST_COMMIT.md`;
+
 /**
- * Generates two AI-powered Markdown files per release:
+ * Overwrites two fixed Markdown files on every commit — no versioned folders.
  *
- *   PROJECT_EVOLUTION.md  — narrative of how the whole project evolved
- *                           (reads ALL commits, not just recent ones)
+ *   release-notes/PROJECT_EVOLUTION.md  — full project history narrative
+ *   release-notes/LATEST_COMMIT.md      — breakdown of the latest commit
  *
- *   LATEST_COMMIT.md      — detailed breakdown of the single latest commit
- *                           (includes files changed, workflow impact, risk)
- *
- * Directory structure (same pattern as the original generateMockFiles):
- *   release-notes/release-<N>/PROJECT_EVOLUTION.md
- *   release-notes/release-<N>/LATEST_COMMIT.md
+ * Both files are always up-to-date with the current state of the repo.
  */
 export async function generateReleaseFiles(): Promise<void> {
   // Step 1: Fetch full commit history for the evolution document
   const allCommits = getAllCommits();
   console.log(`📋 Fetched ${allCommits.length} total commit(s) for analysis.`);
 
-  // Step 2: Fetch file-change stats for the latest commit (for the detail document)
+  // Step 2: Fetch file-change stats for the latest commit
   const latestFileStat = getLatestCommitStat();
   console.log("📊 Latest commit file stats retrieved.");
 
@@ -31,18 +29,14 @@ export async function generateReleaseFiles(): Promise<void> {
     latestFileStat
   );
 
-  // Step 4: Determine the next release version number (reuses existing utility)
-  const version = getNextReleaseVersion();
-  const releaseDir = `release-notes/release-${version}`;
+  // Step 4: Ensure the release-notes directory exists
+  fs.mkdirSync(RELEASE_DIR, { recursive: true });
 
-  // Step 5: Create the release directory (same pattern as generateMockFiles)
-  fs.mkdirSync(releaseDir, { recursive: true });
+  // Step 5: Overwrite the same two files every time
+  fs.writeFileSync(EVOLUTION_FILE, evolution, "utf-8");
+  fs.writeFileSync(LATEST_FILE, latestCommit, "utf-8");
 
-  // Step 6: Write the two AI-generated documents
-  fs.writeFileSync(`${releaseDir}/PROJECT_EVOLUTION.md`, evolution, "utf-8");
-  fs.writeFileSync(`${releaseDir}/LATEST_COMMIT.md`, latestCommit, "utf-8");
-
-  console.log(`📄 PROJECT_EVOLUTION.md → ${releaseDir}/PROJECT_EVOLUTION.md`);
-  console.log(`📄 LATEST_COMMIT.md     → ${releaseDir}/LATEST_COMMIT.md`);
-  console.log(`✅ Release files written successfully.`);
+  console.log(`📄 PROJECT_EVOLUTION.md → ${EVOLUTION_FILE}`);
+  console.log(`📄 LATEST_COMMIT.md     → ${LATEST_FILE}`);
+  console.log(`✅ Release files updated successfully.`);
 }
