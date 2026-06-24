@@ -9,16 +9,16 @@ inputs:
   gemini-api-key:
     description: >
       Your Google Gemini API key. Store this as a repository secret and pass it
-      as ${{ secrets.GEMINI_API_KEY }}. Never hardcode it in your workflow.
+      in via the secrets context in your workflow. Never hardcode it directly.
     required: true
 
   github-token:
     description: >
       GitHub token used to commit the generated release notes back to your
-      repository. The default ${{ github.token }} works for most cases. If you
-      push to a different repository you will need a PAT with contents:write.
+      repository. Pass the built-in workflow token via the github context for
+      most cases. If you push to a different repository you will need a PAT
+      with contents:write.
     required: false
-    default: ${{ github.token }}
 
   commit-notes:
     description: >
