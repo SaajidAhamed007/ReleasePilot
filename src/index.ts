@@ -1,7 +1,8 @@
-import { getCommits } from "./github/getCommit";
-import { getGithubContext } from "./github/githubContext";
+import { getGithubContext } from "./github/githubContext.js";
+import { getCommits } from "./github/getCommits.js";
 
-const commits = getCommits();
-
+console.log("=== GITHUB CONTEXT ===");
 console.log(getGithubContext());
-console.log(commits);
+
+console.log("=== COMMITS ===");
+console.log(getCommits());
