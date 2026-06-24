@@ -1,0 +1,1 @@
+{"version":3,"file":"githubContext.js","sourceRoot":"","sources":["../../src/github/githubContext.ts"],"names":[],"mappings":";;AAAA,4CAMC;AAND,SAAgB,gBAAgB;IAC9B,OAAO;QACL,UAAU,EAAE,OAAO,CAAC,GAAG,CAAC,iBAAiB;QACzC,GAAG,EAAE,OAAO,CAAC,GAAG,CAAC,UAAU;QAC3B,GAAG,EAAE,OAAO,CAAC,GAAG,CAAC,UAAU;KAC5B,CAAC;AACJ,CAAC"}
