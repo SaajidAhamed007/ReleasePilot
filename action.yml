@@ -1,12 +1,12 @@
 name: ReleasePilot
 
-description: AI-powered changelog and release notes generator
+description: AI-powered changelog and release notes generator using Gemini
 
 author: Saajid Ahamed
 
 inputs:
-  openai_api_key:
-    description: OpenAI API Key
+  gemini_api_key:
+    description: Google Gemini API Key
     required: true
 
 runs:
