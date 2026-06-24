@@ -10,11 +10,19 @@ export function commitChanges() {
     'git config user.email "41898282+github-actions[bot]@users.noreply.github.com"'
   );
 
-  execSync("git add CHANGELOG.md RELEASE_NOTES.md");
+  execSync("git add release-notes/");
 
-  execSync(
-    'git commit -m "docs: auto generate release notes"'
-  );
+  try {
+    execSync(
+      'git commit -m "docs: auto generate release notes"',
+      { stdio: "inherit" }
+    );
 
-  execSync("git push");
+    execSync("git push", {
+      stdio: "inherit"
+    });
+
+  } catch {
+    console.log("No changes to commit");
+  }
 }
